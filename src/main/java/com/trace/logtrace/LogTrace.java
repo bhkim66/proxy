@@ -1,6 +1,7 @@
-package com.advanced.app.trace.logtrace;
+package com.trace.logtrace;
 
-import com.advanced.app.trace.TraceStatus;
+
+import com.trace.TraceStatus;
 
 public interface LogTrace {
     TraceStatus begin(String message);

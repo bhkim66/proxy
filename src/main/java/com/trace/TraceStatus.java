@@ -1,4 +1,4 @@
-package com.advanced.app.trace;
+package com.trace;
 
 public class TraceStatus {
     private TraceId traceId;
