@@ -1,2 +1,5 @@
-package com.proxy.jdkdynamic.code;public interface AInterface {
+package com.proxy.jdkdynamic.code;
+
+public interface AInterface {
+    String call();
 }

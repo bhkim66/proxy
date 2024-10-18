@@ -9,7 +9,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-@Import(InterfaceProxyConfig.class)
+import javax.swing.*;
+
+//@Import(InterfaceProxyConfig.class)
+@Import(JTree.DynamicUtilTreeNode.class)
 @SpringBootApplication(scanBasePackages = "com.proxy.app.v3")
 public class ProxyApplication {
 
