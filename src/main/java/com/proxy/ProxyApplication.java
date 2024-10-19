@@ -2,6 +2,8 @@ package com.proxy;
 
 import com.proxy.config.AppV1Config;
 import com.proxy.config.v1_proxy.InterfaceProxyConfig;
+import com.proxy.config.v3_proxyfactory.ProxyFactoryConfigV1;
+import com.proxy.config.v3_proxyfactory.ProxyFactoryConfigV2;
 import com.trace.logtrace.LogTrace;
 import com.trace.logtrace.ThreadLocalLogTrace;
 import org.springframework.boot.SpringApplication;
@@ -12,7 +14,7 @@ import org.springframework.context.annotation.Import;
 import javax.swing.*;
 
 //@Import(InterfaceProxyConfig.class)
-@Import(JTree.DynamicUtilTreeNode.class)
+@Import(ProxyFactoryConfigV2.class)
 @SpringBootApplication(scanBasePackages = "com.proxy.app.v3")
 public class ProxyApplication {
 
