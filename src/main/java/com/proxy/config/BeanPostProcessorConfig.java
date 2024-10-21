@@ -31,4 +31,5 @@ public class BeanPostProcessorConfig {
         //advisor = pointcut + advice
         return new DefaultPointcutAdvisor(pointcut, advice);
     }
+
 }

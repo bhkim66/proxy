@@ -6,6 +6,8 @@ import com.proxy.common.service.ServiceInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
@@ -17,6 +19,8 @@ import java.lang.reflect.Method;
 
 @Slf4j
 public class AdvisorTest {
+
+    private static final Logger log = LoggerFactory.getLogger(AdvisorTest.class);
 
     @Test
     void advisorTest1() {
