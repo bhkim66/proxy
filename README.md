@@ -508,3 +508,116 @@ implementation 'org.springframework.boot:spring-boot-starter-aop'
 1. **프록시 적용 대상 체크** : 앞서 3-1, 3-2에서 조회한 `Advisor` 에 포함되어 있는 포인트컷을 사용해서 해당 객체가 프록시를 적용할 대상인지 아닌지 판단한다. 이때 객체의 클래스 정보는 물론이고, 해당 객체의 모든 메서드를 포인트컷에 하나하나 모두 매칭해본다. **그래서 조건이 하나라도 만족하면 프록시 적용 대상이 된다**. 예를 들어 서 메서드 하나만 포인트컷 조건에 만족해도 프록시 적용 대상이 된다.
 2. **프록시 생성** : 프록시 적용 대상이면 프록시를 생성하고 프록시를 반환한다. 그래서 프록시를 스프링 빈으로 등록한다. 만약 프록시 대상이 아니라면 원본 객체를 반환해서 **원본 객체를 스프링 빈으로 등록**한다
 3. **빈 등록** : 반환된 객체는 스프링 빈으로 등록된다
+
+
+# 프록시 패턴
+
+## 프록시
+
+- 클라이언트와 서버의 기본 개념을 정의하면 클라이언**트는 서버에 필요한 것을 요청하고, 서버는 클라이언트에 요청을 처리** 하는 것이다
+- 컴퓨터 네트워크에 적용하면 클라이언트는 `웹 브라우저`가 되고, 요청을 처리하는 서버는 `웹 서버`가 된다
+- 그런데 클라이언트가 요청한 결과를 서버에 직접 요청하는 것이 아니라 **어떤 대리자를 통해서 대신 간접적으로 서버에 요청**하는 것을 `프록시`(대리자)라고 한다
+
+
+**대체 가능**
+
+- 객체에서 프록시가 되려면, 클라이언트는 서버에게 요청을 한 것인지, 프록시에게 요청을 한 것인지 조차 몰라야한다
+    - 서버와 프록시는 같은 인터페이스를 사용해야 한다
+    - 클라이언트가 사용하는 **서버 객체를 프록시 객체로 변경해도 클라이언트 코드를 변경하지 않고 동작할 수 있어야 한다**
+
+
+### 프록시의 주요 기능
+
+- **접근 제어**
+    - 권한에 따른 접근 차단
+    - 캐싱
+    - 지연 로딩
+- **부가 기능 추가**
+    - 원래 서버가 제공하는 기능에 더해서 부가 기능을 수행한다
+    - 예) 요청 값이나, 응답 값을 중간에 변형한다.
+    - 예) 실행 시간을 측정해서 추가 로그를 남긴다.
+- **GOF 디자인 패턴**
+    - 둘다 프록시를 사용하는 방법이지만 `GOF 디자인 패턴`에서는 이 둘을 의도에 따라서 프록시 패턴과 데코레이터 패턴으로 구분한다
+    - **프록시 패턴** : 접근 제어가 목적
+    - **데코레이터 패턴** : 새로운 기능 추가가 목적
+
+## 프록시 패턴
+
+
+```java
+@Slf4j
+public class CacheProxy implements Subject {
+	private Subject target;
+	private String cacheValue;
+	
+	public CacheProxy(Subject target) {
+		this.target = target;
+	}
+	
+	@Override
+	public String operation() {
+		log.info("프록시 호출");
+		if (cacheValue == null) {
+			cacheValue = target.operation();
+		}
+		return cacheValue;
+	}
+}
+```
+
+```java
+@Slf4j
+public class RealSubject implements Subject {
+	@Override
+	public String operation() {
+		log.info("실제 객체 호출");
+		sleep(1000);
+		return "data";
+	}
+	
+	private void sleep(int millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+}
+```
+
+```java
+public class ProxyPatternTest {
+	@Test
+	void noProxyTest() {
+		RealSubject realSubject = new RealSubject();
+		ProxyPatternClient client = new ProxyPatternClient(realSubject);
+		client.execute();
+		client.execute();
+		client.execute();
+	}
+	
+	@Test
+	void cacheProxyTest() {
+		Subject realSubject = new RealSubject();
+		Subject cacheProxy = new CacheProxy(realSubject);
+		ProxyPatternClient client = new ProxyPatternClient(cacheProxy);
+		client.execute();
+		client.execute();
+		client.execute();
+	}
+}
+
+//실행 결과
+CacheProxy - 프록시 호출
+RealSubject - 실제 객체 호출
+CacheProxy - 프록시 호출
+CacheProxy - 프록시 호출
+```
+
+**cacheProxyTest()**
+`realSubject` 와 `cacheProxy` 를 생성하고 둘을 연결한다. 결과적으로 `cacheProxy` 가 `realSubject` 를 참조하는 런타임 객체 의존관계가 완성된다. 그리고 마지막으로 `client` 에 `realSubject` 가 아닌 `cacheProxy` 를 주입한다. 이 과정을 통해서 `client -> cacheProxy -> realSubject` 런타임 객체 의존 관계가 완성된다
+
+**정리**
+
+- 프록시 패턴의 핵심은 `RealSubject` 코드와 클라이언트 코드를 전혀 변경하지 않고, 프록시를 도입해서 접근 제어를 했다는 점이다
+- 그리고 클라이언트 코드의 변경 없이 자유롭게 프록시를 넣고 뺄 수 있다. 실제 클라이언트 입장에서는 프록시 객체가 주입되었는지, 실제 객체가 주입되었는지 알지 못한다
